@@ -1,5 +1,9 @@
 pipeline {
     agent any
+     environment {
+        TF_VAR_bucket_name = 'pankaj-terraform-demo-20260813456'
+        TF_VAR_aws_region  = 'ap-southeast-2'
+    }
 
     triggers {
         githubPush()
