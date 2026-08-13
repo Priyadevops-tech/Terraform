@@ -1,6 +1,9 @@
 pipeline {
-
     agent any
+
+    triggers {
+        githubPush()
+    }
 
     stages {
 
@@ -10,39 +13,34 @@ pipeline {
             }
         }
 
+        stage('Check Terraform Files') {
+            steps {
+                sh 'pwd'
+                sh 'ls -la'
+            }
+        }
+
         stage('Terraform Init') {
             steps {
-                bat 'terraform init -input=false'
+                sh 'terraform init -input=false'
             }
         }
 
         stage('Terraform Validate') {
             steps {
-                bat 'terraform validate'
+                sh 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                bat 'terraform plan -out=tfplan'
-            }
-        }
-
-        stage('Approval') {
-            steps {
-                input message: 'Approve Terraform deployment?',
-                      ok: 'Deploy'
+                sh 'terraform plan -out=tfplan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding',
-                     credentialsId: 'aws-terraform']
-                ]) {
-                    bat 'terraform apply -auto-approve tfplan'
-                }
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
     }
